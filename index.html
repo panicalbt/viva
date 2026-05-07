@@ -427,10 +427,14 @@
 
         .player-name {
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             gap: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px; /* Limit width for long nicknames */
         }
 
         .donor-name {
@@ -619,18 +623,48 @@
         }
 
         async function syncWithUpstash() {
-            if (!UPSTASH_URL || UPSTASH_URL === 'YOUR_UPSTASH_REDIS_REST_URL' || UPSTASH_URL === '') return;
+            if (!UPSTASH_URL || UPSTASH_URL.includes('YOUR_UPSTASH')) return;
             
             try {
                 const photo = user.photo_url || '';
-                // Сохраняем имя и фото через разделитель, чтобы потом распарсить
                 const member = `${username}|${photo}`; 
                 
+                // 1. Обновляем глобальный лидерборд
                 await fetch(`${UPSTASH_URL}/zadd/leaderboard/${count}/${member}`, {
                     headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
                 });
+
+                // 2. Сохраняем личный счет по ID пользователя для синхронизации между устройствами
+                if (user.id && user.id !== 'local') {
+                    await fetch(`${UPSTASH_URL}/set/user_score:${user.id}/${count}`, {
+                        headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+                    });
+                }
             } catch (err) {
                 console.error('Upstash sync error:', err);
+            }
+        }
+
+        async function loadInitialScore() {
+            if (!UPSTASH_URL || UPSTASH_URL.includes('YOUR_UPSTASH') || !user.id || user.id === 'local') return;
+
+            try {
+                const response = await fetch(`${UPSTASH_URL}/get/user_score:${user.id}`, {
+                    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+                });
+                const data = await response.json();
+                
+                if (data.result !== null) {
+                    const remoteScore = parseInt(data.result);
+                    if (remoteScore > count) {
+                        count = remoteScore;
+                        scoreEl.innerText = count;
+                        localStorage.setItem('vova_burgers', count);
+                        console.log('Scores synced from cloud:', count);
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load initial score:', err);
             }
         }
 
@@ -699,13 +733,18 @@
             }
         }
 
+        let leaderboardInterval;
+
         function openLeaderboard() {
             leaderboardModal.style.display = 'flex';
             fetchLeaderboard();
+            // Real-time update every 5 seconds while open
+            leaderboardInterval = setInterval(fetchLeaderboard, 5000);
         }
 
         function closeLeaderboard() {
             leaderboardModal.style.display = 'none';
+            clearInterval(leaderboardInterval);
         }
 
         function openDonate() {
@@ -851,7 +890,10 @@
             tg.openTelegramLink('https://t.me/sociapatik');
         });
 
-        setTimeout(syncWithUpstash, 1000);
+        // Load initial score and sync
+        loadInitialScore().then(() => {
+            setTimeout(syncWithUpstash, 1000);
+        });
     </script>
 </body>
 
