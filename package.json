@@ -1,0 +1,13 @@
+{
+  "name": "vova-clicker",
+  "version": "1.0.0",
+  "description": "Telegram Mini App VOVA Clicker",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

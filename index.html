@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VOVA Clicker</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #fbbf24;
+            --secondary: #f59e0b;
+            --accent: #ef4444;
+            --bg: #0f172a;
+            --text: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%);
+            color: var(--text);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation;
+        }
+
+        #app {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 20px;
+        }
+
+        .header {
+            text-align: center;
+            z-index: 10;
+        }
+
+        #main-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+            animation: fadeIn 1s ease-out;
+        }
+
+        .score-container {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 24px 48px;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #score {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.4));
+        }
+
+        .boss-stage {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #vova {
+            width: 80vw;
+            max-width: 320px;
+            height: auto;
+            aspect-ratio: 1/1;
+            object-fit: contain;
+            cursor: pointer;
+            filter: drop-shadow(0 40px 80px rgba(0,0,0,0.7));
+            transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+            -webkit-user-drag: none;
+        }
+
+        #vova:active {
+            transform: scale(0.8) translateY(15px);
+        }
+
+        .burger-particle {
+            position: absolute;
+            font-size: 3rem;
+            pointer-events: none;
+            z-index: 100;
+            animation: particleFloat 0.8s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translate(0, 0) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.8) rotate(var(--tr)); opacity: 0; }
+        }
+
+        .fart-cloud {
+            position: absolute;
+            bottom: 25%;
+            font-size: 5rem;
+            pointer-events: none;
+            z-index: 2;
+            filter: blur(3px);
+            animation: fartOut 0.6s ease-out forwards;
+        }
+
+        @keyframes fartOut {
+            0% { transform: scale(0.3) translateY(0); opacity: 0; }
+            30% { opacity: 0.7; }
+            100% { transform: scale(3) translateY(100px) rotate(15deg); opacity: 0; }
+        }
+
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-3px, 0, 0); }
+            20%, 80% { transform: translate3d(5px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+            40%, 60% { transform: translate3d(8px, 0, 0); }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .instruction {
+            font-size: 0.9rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: rgba(255,255,255,0.2);
+            text-transform: uppercase;
+            margin-top: 30px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        .footer-text {
+            text-align: center;
+            color: rgba(255,255,255,0.15);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            line-height: 1.6;
+        }
+
+        #creator-link {
+            color: var(--primary);
+            text-decoration: none;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            font-size: 0.65rem;
+        }
+
+        #creator-link:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <h1 id="main-title">ЛАБАТАМИЯ ФАРМ</h1>
+            <div class="score-container">
+                <div id="score">0</div>
+                <div style="font-size: 1rem; color: var(--primary); font-weight: 900; letter-spacing: 2px;">BURGERS</div>
+            </div>
+            <div class="instruction">TAP HEAD TO FART</div>
+        </div>
+
+        <div class="boss-stage">
+            <img src="vova.png" id="vova" alt="VOVA">
+        </div>
+
+        <div class="footer-text">
+            Ебани жирного на чердаку<br>
+            <a href="https://t.me/sociapatik" id="creator-link">CREATOR: @sociapatik</a>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        tg.headerColor = '#0f172a';
+        tg.backgroundColor = '#0f172a';
+
+        let count = parseInt(localStorage.getItem('vova_burgers') || '0');
+        const scoreEl = document.getElementById('score');
+        const vova = document.getElementById('vova');
+        const app = document.getElementById('app');
+        
+        scoreEl.innerText = count;
+
+        let audioCtx;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playComicalSounds() {
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const now = audioCtx.currentTime;
+
+            // 1. SMACK / HIT SOUND
+            const smackOsc = audioCtx.createOscillator();
+            const smackGain = audioCtx.createGain();
+            smackOsc.type = 'square';
+            smackOsc.frequency.setValueAtTime(150, now);
+            smackOsc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+            smackGain.gain.setValueAtTime(0.3, now);
+            smackGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            smackOsc.connect(smackGain);
+            smackGain.connect(audioCtx.destination);
+            smackOsc.start(now);
+            smackOsc.stop(now + 0.1);
+
+            // 2. FART SOUND (Comical)
+            const fartOsc = audioCtx.createOscillator();
+            const fartGain = audioCtx.createGain();
+            const fartFilter = audioCtx.createBiquadFilter();
+            fartOsc.type = 'sawtooth';
+            const baseFreq = 50 + Math.random() * 40;
+            fartOsc.frequency.setValueAtTime(baseFreq, now + 0.05);
+            fartOsc.frequency.exponentialRampToValueAtTime(baseFreq / 4, now + 0.4);
+            fartFilter.type = 'lowpass';
+            fartFilter.frequency.setValueAtTime(400, now);
+            fartFilter.Q.setValueAtTime(15, now);
+            fartGain.gain.setValueAtTime(0, now);
+            fartGain.gain.linearRampToValueAtTime(0.4, now + 0.1);
+            fartGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+            fartOsc.connect(fartFilter);
+            fartFilter.connect(fartGain);
+            fartGain.connect(audioCtx.destination);
+            fartOsc.start(now + 0.05);
+            fartOsc.stop(now + 0.4);
+
+            // 3. BURGER "CHA-CHING" / DING
+            const dingOsc = audioCtx.createOscillator();
+            const dingGain = audioCtx.createGain();
+            dingOsc.type = 'triangle';
+            dingOsc.frequency.setValueAtTime(800 + Math.random() * 200, now + 0.1);
+            dingOsc.frequency.exponentialRampToValueAtTime(1200, now + 0.2);
+            dingGain.gain.setValueAtTime(0, now + 0.1);
+            dingGain.gain.linearRampToValueAtTime(0.2, now + 0.15);
+            dingGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            dingOsc.connect(dingGain);
+            dingGain.connect(audioCtx.destination);
+            dingOsc.start(now + 0.1);
+            dingOsc.stop(now + 0.3);
+        }
+
+        function createParticle(x, y, emoji, type) {
+            const p = document.createElement('div');
+            p.className = type;
+            p.innerText = emoji;
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            
+            if (type === 'burger-particle') {
+                p.style.setProperty('--tx', (Math.random() - 0.5) * 500 + 'px');
+                p.style.setProperty('--ty', -400 - Math.random() * 300 + 'px');
+                p.style.setProperty('--tr', Math.random() * 1440 + 'deg');
+            }
+            
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 1000);
+        }
+
+        function handleHit(e) {
+            initAudio();
+            
+            count++;
+            scoreEl.innerText = count;
+            localStorage.setItem('vova_burgers', count);
+            
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('heavy');
+            }
+
+            vova.parentElement.classList.remove('shake');
+            void vova.parentElement.offsetWidth; 
+            vova.parentElement.classList.add('shake');
+
+            const x = e.clientX || (e.touches && e.touches[0].clientX);
+            const y = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            createParticle(x - 25, y - 25, '🍔', 'burger-particle');
+            
+            const rect = vova.getBoundingClientRect();
+            createParticle(rect.left + rect.width / 2 - 40, rect.bottom - 60, '💨', 'fart-cloud');
+            
+            playComicalSounds();
+        }
+
+        vova.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleHit(e);
+        }, { passive: false });
+
+        vova.addEventListener('mousedown', (e) => {
+            if (e.button === 0) handleHit(e);
+        });
+
+        document.getElementById('creator-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            tg.openTelegramLink('https://t.me/sociapatik');
+        });
+
+        // The user wants to use the original photo, so we don't add a fallback.
+        // We assume vova.png exists in the root directory.
+    </script>
+
+</body>
+</html>
