@@ -529,6 +529,7 @@
          */
         const UPSTASH_URL = 'https://clear-filly-118043.upstash.io';
         const UPSTASH_TOKEN = 'gQAAAAAAAc0bAAIgcDJjZjAwMTAwNWI2ZDM0M2RjYTI3OTIwNmU4NzFkNzcyNg';
+        const SERVER_URL = window.location.origin; // Автоматически подхватит URL после деплоя на Vercel
 
         const tg = window.Telegram.WebApp;
         tg.expand();
@@ -633,7 +634,7 @@
             donateModal.style.display = 'none';
         }
 
-        function sendDonate(amount) {
+        async function sendDonate(amount) {
             tg.showPopup({
                 title: 'Донат ' + amount + ' ⭐',
                 message: 'Хочешь отправить ' + amount + ' звезд на развитие Лабатамии?',
@@ -641,11 +642,32 @@
                     { id: 'confirm', type: 'default', text: 'Оплатить' },
                     { type: 'cancel', text: 'Отмена' }
                 ]
-            }, (btnId) => {
+            }, async (btnId) => {
                 if (btnId === 'confirm') {
-                    // Здесь вызывается tg.openInvoice(url)
-                    tg.showAlert('Для оплаты звездами (⭐) нужно создать инвойс через бота. \n\nВыбрано: ' + amount + ' звезд.');
-                    closeDonate();
+                    try {
+                        // Запрашиваем ссылку на оплату у нашего сервера (Vercel API)
+                        const response = await fetch(`${SERVER_URL}/api/create-invoice?amount=${amount}`);
+                        const data = await response.json();
+                        
+                        if (data.link) {
+                            // Открываем окно оплаты Telegram
+                            tg.openInvoice(data.link, (status) => {
+                                if (status === 'paid') {
+                                    tg.showAlert('Оплата прошла успешно! Спасибо за поддержку ❤️');
+                                    closeDonate();
+                                } else if (status === 'cancelled') {
+                                    tg.showAlert('Оплата отменена.');
+                                } else {
+                                    tg.showAlert('Ошибка при оплате.');
+                                }
+                            });
+                        } else {
+                            tg.showAlert('Ошибка: сервер не смог создать инвойс.');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        tg.showAlert('Ошибка связи с сервером. Убедись, что server.js запущен!');
+                    }
                 }
             });
         }
