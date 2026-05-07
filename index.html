@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -64,10 +65,11 @@
             letter-spacing: 4px;
             margin-bottom: 20px;
             background: linear-gradient(to right, #fff, var(--primary));
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-transform: uppercase;
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
             animation: fadeIn 1s ease-out;
         }
 
@@ -87,6 +89,7 @@
             font-weight: 900;
             line-height: 1;
             background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.4));
@@ -108,7 +111,7 @@
             aspect-ratio: 1/1;
             object-fit: contain;
             cursor: pointer;
-            filter: drop-shadow(0 40px 80px rgba(0,0,0,0.7));
+            filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.7));
             transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 5;
             -webkit-user-drag: none;
@@ -127,8 +130,15 @@
         }
 
         @keyframes particleFloat {
-            0% { transform: translate(0, 0) scale(0.5); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) scale(1.8) rotate(var(--tr)); opacity: 0; }
+            0% {
+                transform: translate(0, 0) scale(0.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1.8) rotate(var(--tr));
+                opacity: 0;
+            }
         }
 
         .fart-cloud {
@@ -142,45 +152,84 @@
         }
 
         @keyframes fartOut {
-            0% { transform: scale(0.3) translateY(0); opacity: 0; }
-            30% { opacity: 0.7; }
-            100% { transform: scale(3) translateY(100px) rotate(15deg); opacity: 0; }
+            0% {
+                transform: scale(0.3) translateY(0);
+                opacity: 0;
+            }
+
+            30% {
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(3) translateY(100px) rotate(15deg);
+                opacity: 0;
+            }
         }
 
         .shake {
-            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+            animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
         }
 
         @keyframes shake {
-            10%, 90% { transform: translate3d(-3px, 0, 0); }
-            20%, 80% { transform: translate3d(5px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
-            40%, 60% { transform: translate3d(8px, 0, 0); }
+
+            10%,
+            90% {
+                transform: translate3d(-3px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(5px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-8px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(8px, 0, 0);
+            }
         }
 
         @keyframes slideDown {
-            from { transform: translateY(-100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .instruction {
             font-size: 0.9rem;
             font-weight: 900;
             letter-spacing: 5px;
-            color: rgba(255,255,255,0.2);
+            color: rgba(255, 255, 255, 0.2);
             text-transform: uppercase;
             margin-top: 30px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.1);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
 
         .footer-text {
             text-align: center;
-            color: rgba(255,255,255,0.15);
+            color: rgba(255, 255, 255, 0.15);
             font-size: 0.75rem;
             font-weight: 700;
             letter-spacing: 2px;
@@ -200,11 +249,12 @@
             opacity: 1;
         }
 
-        /* Leaderboard Styles */
+        /* Top Buttons Layout */
         .top-btn {
             position: absolute;
             top: 20px;
-            right: 140px;
+            left: 20px;
+            /* Moved to Top Left as requested */
             background: var(--glass);
             border: 1px solid var(--glass-border);
             padding: 10px 20px;
@@ -223,7 +273,6 @@
 
         .top-btn:active {
             transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.1);
         }
 
         .donate-btn-right {
@@ -247,24 +296,38 @@
         }
 
         @keyframes starPulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
+            }
+
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(250, 204, 21, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
+            }
         }
 
-        #leaderboard-modal {
+        /* Modal Styles */
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             z-index: 1000;
             display: none;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
+            justify-content: center;
+            padding: 20px;
             animation: fadeIn 0.3s ease-out;
         }
 
@@ -273,20 +336,20 @@
             max-width: 400px;
             background: var(--glass);
             border: 1px solid var(--glass-border);
-            border-radius: 30px;
+            border-radius: 35px;
             padding: 30px;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            max-height: 80vh;
+            max-height: 90vh;
             overflow-y: auto;
+            position: relative;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
         }
 
         .modal-title {
@@ -297,14 +360,20 @@
         }
 
         .close-btn {
-            background: none;
+            background: rgba(255, 255, 255, 0.1);
             border: none;
             color: var(--text);
-            font-size: 1.5rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             cursor: pointer;
-            opacity: 0.5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
+        /* Leaderboard Specific */
         .leaderboard-list {
             display: flex;
             flex-direction: column;
@@ -319,69 +388,80 @@
             background: rgba(255, 255, 255, 0.03);
             border-radius: 20px;
             border: 1px solid transparent;
-            transition: all 0.3s ease;
         }
 
-        .player-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .rank {
-            font-weight: 900;
-            font-size: 1.2rem;
-            width: 30px;
-            opacity: 0.5;
-        }
-
-        .player-name {
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .player-score {
-            font-weight: 900;
-            color: var(--primary);
-        }
-
-        /* Glowing Top Places */
         .rank-1 {
             border: 2px solid #ffd700 !important;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-            background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
         }
-        .rank-1 .rank { color: #ffd700; opacity: 1; }
 
         .rank-2 {
             border: 2px solid #c0c0c0 !important;
             box-shadow: 0 0 15px rgba(192, 192, 192, 0.2);
-            background: linear-gradient(90deg, rgba(192, 192, 192, 0.1), transparent);
         }
-        .rank-2 .rank { color: #c0c0c0; opacity: 1; }
 
         .rank-3 {
             border: 2px solid #cd7f32 !important;
             box-shadow: 0 0 15px rgba(205, 127, 50, 0.2);
-            background: linear-gradient(90deg, rgba(205, 127, 50, 0.1), transparent);
         }
-        .rank-3 .rank { color: #cd7f32; opacity: 1; }
+
+        /* Donate Specific */
+        .donate-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .donate-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .donate-option:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+        }
+
+        .star-amount {
+            font-size: 1.5rem;
+            font-weight: 900;
+            display: block;
+            margin-bottom: 5px;
+            color: #facc15;
+        }
+
+        .star-label {
+            font-size: 0.7rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
     </style>
 </head>
+
 <body>
     <div id="app">
         <button class="top-btn" onclick="openLeaderboard()">
             <span>🏆</span> TOP
         </button>
 
-        <button class="donate-btn-right" onclick="handleDonate()">
+        <button class="donate-btn-right" onclick="openDonate()">
             <span>⭐</span> DONATE
         </button>
+
         <div class="header">
             <h1 id="main-title">ЛАБАТАМИЯ ФАРМ</h1>
             <div class="score-container">
                 <div id="score">0</div>
-                <div style="font-size: 1rem; color: var(--primary); font-weight: 900; letter-spacing: 2px;">BURGERS</div>
+                <div style="font-size: 1rem; color: var(--primary); font-weight: 900; letter-spacing: 2px;">BURGERS
+                </div>
             </div>
             <div class="instruction">TAP HEAD TO FART</div>
         </div>
@@ -397,7 +477,7 @@
     </div>
 
     <!-- Leaderboard Modal -->
-    <div id="leaderboard-modal">
+    <div id="leaderboard-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Top Eaters</h2>
@@ -409,10 +489,46 @@
         </div>
     </div>
 
+    <!-- Donate Modal -->
+    <div id="donate-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Donate Stars</h2>
+                <button class="close-btn" onclick="closeDonate()">✕</button>
+            </div>
+            <p style="text-align: center; opacity: 0.7; font-size: 0.9rem;">Выбери количество ⭐ для поддержки проекта
+            </p>
+            <div class="donate-grid">
+                <div class="donate-option" onclick="sendDonate(10)">
+                    <span class="star-amount">10</span>
+                    <span class="star-label">Stars</span>
+                </div>
+                <div class="donate-option" onclick="sendDonate(50)">
+                    <span class="star-amount">50</span>
+                    <span class="star-label">Stars</span>
+                </div>
+                <div class="donate-option" onclick="sendDonate(100)">
+                    <span class="star-amount">100</span>
+                    <span class="star-label">Stars</span>
+                </div>
+                <div class="donate-option" onclick="sendDonate(500)">
+                    <span class="star-amount">500</span>
+                    <span class="star-label">Stars</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Upstash Configuration (Replace with your actual keys)
-        const UPSTASH_URL = 'YOUR_UPSTASH_REDIS_REST_URL';
-        const UPSTASH_TOKEN = 'YOUR_UPSTASH_REDIS_REST_TOKEN';
+        /**
+         * ⚠️ ИНСТРУКЦИЯ ПО НАСТРОЙКЕ UPSTASH:
+         * 1. Создай аккаунт на https://upstash.com/
+         * 2. Создай Redis базу данных.
+         * 3. Скопируй "REST URL" и "REST Token" из консоли.
+         * 4. Вставь их ниже вместо 'YOUR_UPSTASH_...'
+         */
+        const UPSTASH_URL = 'https://clear-filly-118043.upstash.io';
+        const UPSTASH_TOKEN = 'gQAAAAAAAc0bAAIgcDJjZjAwMTAwNWI2ZDM0M2RjYTI3OTIwNmU4NzFkNzcyNg';
 
         const tg = window.Telegram.WebApp;
         tg.expand();
@@ -428,12 +544,13 @@
         const vova = document.getElementById('vova');
         const app = document.getElementById('app');
         const leaderboardModal = document.getElementById('leaderboard-modal');
+        const donateModal = document.getElementById('donate-modal');
         const leaderboardList = document.getElementById('leaderboard-list');
-        
+
         scoreEl.innerText = count;
 
         let audioCtx;
-        
+
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -441,11 +558,10 @@
         }
 
         async function syncWithUpstash() {
-            if (!UPSTASH_URL || UPSTASH_URL === 'YOUR_UPSTASH_REDIS_REST_URL') return;
-            
+            if (!UPSTASH_URL || UPSTASH_URL === 'YOUR_UPSTASH_REDIS_REST_URL' || UPSTASH_URL === '') return;
+
             try {
-                // ZADD leaderboard <count> <username>
-                const member = username; 
+                const member = username;
                 await fetch(`${UPSTASH_URL}/zadd/leaderboard/${count}/${member}`, {
                     headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
                 });
@@ -455,8 +571,13 @@
         }
 
         async function fetchLeaderboard() {
-            if (!UPSTASH_URL || UPSTASH_URL === 'YOUR_UPSTASH_REDIS_REST_URL') {
-                leaderboardList.innerHTML = '<div style="color: #ef4444; text-align: center; padding: 20px;">Upstash keys not configured! <br><small>Set UPSTASH_URL and UPSTASH_TOKEN in code.</small></div>';
+            // Проверка на корректность ключей
+            if (!UPSTASH_URL || UPSTASH_URL.includes('YOUR_UPSTASH') || UPSTASH_URL === '') {
+                leaderboardList.innerHTML = `
+                    <div style="color: #ef4444; text-align: center; padding: 10px;">
+                        <p style="font-weight: 900; margin-bottom: 10px;">Ошибка: Upstash не настроен!</p>
+                        <p style="font-size: 0.8rem; opacity: 0.7;">Открой код файла и вставь ключи URL и TOKEN от своего Upstash Redis.</p>
+                    </div>`;
                 return;
             }
 
@@ -468,7 +589,7 @@
                 const result = data.result || [];
 
                 leaderboardList.innerHTML = '';
-                
+
                 if (result.length === 0) {
                     leaderboardList.innerHTML = '<div style="text-align: center; opacity: 0.5;">No scores yet!</div>';
                     return;
@@ -476,9 +597,9 @@
 
                 for (let i = 0; i < result.length; i += 2) {
                     const name = result[i];
-                    const score = result[i+1];
+                    const score = result[i + 1];
                     const rank = (i / 2) + 1;
-                    
+
                     const card = document.createElement('div');
                     card.className = `player-card rank-${rank <= 3 ? rank : 'other'}`;
                     card.innerHTML = `
@@ -504,17 +625,27 @@
             leaderboardModal.style.display = 'none';
         }
 
-        function handleDonate() {
+        function openDonate() {
+            donateModal.style.display = 'flex';
+        }
+
+        function closeDonate() {
+            donateModal.style.display = 'none';
+        }
+
+        function sendDonate(amount) {
             tg.showPopup({
-                title: 'Поддержка Лабатамии',
-                message: 'Хочешь задонатить 50 звезд (⭐) на развитие проекта?',
+                title: 'Донат ' + amount + ' ⭐',
+                message: 'Хочешь отправить ' + amount + ' звезд на развитие Лабатамии?',
                 buttons: [
-                    { id: 'donate', type: 'default', text: 'Да, го!' },
-                    { type: 'cancel', text: 'Позже' }
+                    { id: 'confirm', type: 'default', text: 'Оплатить' },
+                    { type: 'cancel', text: 'Отмена' }
                 ]
             }, (btnId) => {
-                if (btnId === 'donate') {
-                    tg.showAlert('Для оплаты звездами нужен инвойс. Подключи платежи в BotFather и вставь ссылку в код!');
+                if (btnId === 'confirm') {
+                    // Здесь вызывается tg.openInvoice(url)
+                    tg.showAlert('Для оплаты звездами (⭐) нужно создать инвойс через бота. \n\nВыбрано: ' + amount + ' звезд.');
+                    closeDonate();
                 }
             });
         }
@@ -522,10 +653,9 @@
         function playComicalSounds() {
             initAudio();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             const now = audioCtx.currentTime;
 
-            // 1. SMACK / HIT SOUND
+            // SMACK
             const smackOsc = audioCtx.createOscillator();
             const smackGain = audioCtx.createGain();
             smackOsc.type = 'square';
@@ -538,7 +668,7 @@
             smackOsc.start(now);
             smackOsc.stop(now + 0.1);
 
-            // 2. FART SOUND
+            // FART
             const fartOsc = audioCtx.createOscillator();
             const fartGain = audioCtx.createGain();
             const fartFilter = audioCtx.createBiquadFilter();
@@ -557,20 +687,6 @@
             fartGain.connect(audioCtx.destination);
             fartOsc.start(now + 0.05);
             fartOsc.stop(now + 0.4);
-
-            // 3. BURGER DING
-            const dingOsc = audioCtx.createOscillator();
-            const dingGain = audioCtx.createGain();
-            dingOsc.type = 'triangle';
-            dingOsc.frequency.setValueAtTime(800 + Math.random() * 200, now + 0.1);
-            dingOsc.frequency.exponentialRampToValueAtTime(1200, now + 0.2);
-            dingGain.gain.setValueAtTime(0, now + 0.1);
-            dingGain.gain.linearRampToValueAtTime(0.2, now + 0.15);
-            dingGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-            dingOsc.connect(dingGain);
-            dingGain.connect(audioCtx.destination);
-            dingOsc.start(now + 0.1);
-            dingOsc.stop(now + 0.3);
         }
 
         function createParticle(x, y, emoji, type) {
@@ -579,13 +695,11 @@
             p.innerText = emoji;
             p.style.left = x + 'px';
             p.style.top = y + 'px';
-            
             if (type === 'burger-particle') {
                 p.style.setProperty('--tx', (Math.random() - 0.5) * 500 + 'px');
                 p.style.setProperty('--ty', -400 - Math.random() * 300 + 'px');
                 p.style.setProperty('--tr', Math.random() * 1440 + 'deg');
             }
-            
             document.body.appendChild(p);
             setTimeout(() => p.remove(), 1000);
         }
@@ -593,7 +707,7 @@
         let lastSync = 0;
         function throttledSync() {
             const now = Date.now();
-            if (now - lastSync > 5000) { 
+            if (now - lastSync > 5000) {
                 syncWithUpstash();
                 lastSync = now;
             }
@@ -605,43 +719,27 @@
             scoreEl.innerText = count;
             localStorage.setItem('vova_burgers', count);
             throttledSync();
-            
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('heavy');
-            }
-
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
             vova.parentElement.classList.remove('shake');
-            void vova.parentElement.offsetWidth; 
+            void vova.parentElement.offsetWidth;
             vova.parentElement.classList.add('shake');
-
             const x = e.clientX || (e.touches && e.touches[0].clientX);
             const y = e.clientY || (e.touches && e.touches[0].clientY);
-            
             createParticle(x - 25, y - 25, '🍔', 'burger-particle');
-            
             const rect = vova.getBoundingClientRect();
             createParticle(rect.left + rect.width / 2 - 40, rect.bottom - 60, '💨', 'fart-cloud');
-            
             playComicalSounds();
         }
 
-        vova.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleHit(e);
-        }, { passive: false });
-
-        vova.addEventListener('mousedown', (e) => {
-            if (e.button === 0) handleHit(e);
-        });
-
+        vova.addEventListener('touchstart', (e) => { e.preventDefault(); handleHit(e); }, { passive: false });
+        vova.addEventListener('mousedown', (e) => { if (e.button === 0) handleHit(e); });
         document.getElementById('creator-link').addEventListener('click', (e) => {
             e.preventDefault();
             tg.openTelegramLink('https://t.me/sociapatik');
         });
 
-        // Initial sync
         setTimeout(syncWithUpstash, 1000);
     </script>
-
 </body>
+
 </html>
