@@ -87,7 +87,7 @@ module.exports = async (req, res) => {
                 text: 'Привет! Нажми кнопку ниже, чтобы открыть приложение.',
                 reply_markup: {
                     inline_keyboard: [[
-                        { text: 'Открыть Clicker', web_app: { url: 'https://vova-clicker-stars.vercel.app/' } }
+                        { text: 'Открыть Clicker', web_app: { url: 'https://viva-j3o9.vercel.app/' } }
                     ]]
                 }
             });
