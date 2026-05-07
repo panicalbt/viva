@@ -275,6 +275,34 @@
             transform: scale(0.95);
         }
 
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .player-avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #000;
+            font-size: 1.2rem;
+        }
+
         .donate-btn-right {
             position: absolute;
             top: 20px;
@@ -388,6 +416,38 @@
             background: rgba(255, 255, 255, 0.03);
             border-radius: 20px;
             border: 1px solid transparent;
+        }
+
+        .rank {
+            font-weight: 900;
+            font-size: 1.2rem;
+            width: 30px;
+            opacity: 0.5;
+        }
+
+        .player-name {
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .donor-name {
+            color: #ffd700 !important;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            font-weight: 900;
+        }
+
+        .donor-star {
+            color: #facc15;
+            font-size: 0.9rem;
+            filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.8));
+        }
+
+        .player-score {
+            font-weight: 900;
+            color: var(--primary);
         }
 
         .rank-1 {
@@ -560,9 +620,12 @@
 
         async function syncWithUpstash() {
             if (!UPSTASH_URL || UPSTASH_URL === 'YOUR_UPSTASH_REDIS_REST_URL' || UPSTASH_URL === '') return;
-
+            
             try {
-                const member = username;
+                const photo = user.photo_url || '';
+                // Сохраняем имя и фото через разделитель, чтобы потом распарсить
+                const member = `${username}|${photo}`; 
+                
                 await fetch(`${UPSTASH_URL}/zadd/leaderboard/${count}/${member}`, {
                     headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
                 });
@@ -590,6 +653,13 @@
                 const result = data.result || [];
 
                 leaderboardList.innerHTML = '';
+                
+                // Получаем список донатеров из Redis (Set 'donors')
+                const donorsResponse = await fetch(`${UPSTASH_URL}/smembers/donors`, {
+                    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+                });
+                const donorsData = await donorsResponse.json();
+                const donors = new Set(donorsData.result || []);
 
                 if (result.length === 0) {
                     leaderboardList.innerHTML = '<div style="text-align: center; opacity: 0.5;">No scores yet!</div>';
@@ -597,16 +667,28 @@
                 }
 
                 for (let i = 0; i < result.length; i += 2) {
-                    const name = result[i];
+                    const fullMember = result[i]; 
                     const score = result[i + 1];
                     const rank = (i / 2) + 1;
-
+                    const [name, photo] = fullMember.split('|');
+                    const isDonor = donors.has(name);
+                    
                     const card = document.createElement('div');
                     card.className = `player-card rank-${rank <= 3 ? rank : 'other'}`;
+                    
+                    let avatarHtml = `<div class="player-avatar-placeholder">${name[0].toUpperCase()}</div>`;
+                    if (photo && photo !== '') {
+                        avatarHtml = `<img src="${photo}" class="player-avatar" onerror="this.style.display='none'">`;
+                    }
+
                     card.innerHTML = `
                         <div class="player-info">
                             <span class="rank">${rank}</span>
-                            <span class="player-name">${name}</span>
+                            ${avatarHtml}
+                            <span class="player-name ${isDonor ? 'donor-name' : ''}">
+                                ${name}
+                                ${isDonor ? '<span class="donor-star">⭐</span>' : ''}
+                            </span>
                         </div>
                         <span class="player-score">${score} 🍔</span>
                     `;
@@ -646,7 +728,8 @@
                 if (btnId === 'confirm') {
                     try {
                         // Запрашиваем ссылку на оплату у нашего сервера (Vercel API)
-                        const response = await fetch(`${SERVER_URL}/api/create-invoice?amount=${amount}`);
+                        // Передаем username, чтобы пометить его донатером
+                        const response = await fetch(`${SERVER_URL}/api/create-invoice?amount=${amount}&username=${username}`);
                         const data = await response.json();
                         
                         if (data.link) {
@@ -666,7 +749,7 @@
                         }
                     } catch (err) {
                         console.error(err);
-                        tg.showAlert('Ошибка связи с сервером. Убедись, что server.js запущен!');
+                        tg.showAlert('Ошибка связи с сервером.');
                     }
                 }
             });
@@ -727,6 +810,7 @@
         }
 
         let lastSync = 0;
+
         function throttledSync() {
             const now = Date.now();
             if (now - lastSync > 5000) {
@@ -753,8 +837,15 @@
             playComicalSounds();
         }
 
-        vova.addEventListener('touchstart', (e) => { e.preventDefault(); handleHit(e); }, { passive: false });
-        vova.addEventListener('mousedown', (e) => { if (e.button === 0) handleHit(e); });
+        vova.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleHit(e);
+        }, {
+            passive: false
+        });
+        vova.addEventListener('mousedown', (e) => {
+            if (e.button === 0) handleHit(e);
+        });
         document.getElementById('creator-link').addEventListener('click', (e) => {
             e.preventDefault();
             tg.openTelegramLink('https://t.me/sociapatik');
