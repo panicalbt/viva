@@ -5,7 +5,7 @@ const UPSTASH_URL = process.env.UPSTASH_URL || 'https://clear-filly-118043.upsta
 const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN || 'gQAAAAAAAc0bAAIgcDJjZjAwMTAwNWI2ZDM0M2RjYTI3OTIwNmU4NzFkNzcyNg';
 
 // Список ID администраторов (добавьте свой ID сюда)
-const ADMIN_IDS = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',').map(id => id.trim()) : ['614349132']; // Пример ID, замените на свой
+const ADMIN_IDS = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',').map(id => id.trim()) : ['1222821588']; // Ваш ID
 
 const redis = {
     async exec(cmd, ...args) {
@@ -69,14 +69,14 @@ module.exports = async (req, res) => {
         if (state === 'waiting_broadcast' && ADMIN_IDS.includes(userId)) {
             await redis.exec('del', `admin_state:${userId}`);
             await tg.call('sendMessage', { chat_id: chatId, text: '🚀 Начинаю рассылку...' });
-            
+
             const users = await redis.exec('smembers', 'all_users') || [];
             let count = 0;
             for (const uid of users) {
                 const ok = await tg.call('sendMessage', { chat_id: uid, text: text });
                 if (ok) count++;
             }
-            
+
             await tg.call('sendMessage', { chat_id: chatId, text: `✅ Рассылка завершена! Получили: ${count} чел.` });
             return res.status(200).send('OK');
         }
@@ -120,7 +120,7 @@ module.exports = async (req, res) => {
         if (data === 'admin_stats') {
             const totalUsers = await redis.exec('scard', 'all_users') || 0;
             const totalDonors = await redis.exec('scard', 'donors') || 0;
-            
+
             await tg.call('editMessageText', {
                 chat_id: chatId,
                 message_id: update.callback_query.message.message_id,
@@ -135,7 +135,7 @@ module.exports = async (req, res) => {
             await redis.exec('set', `admin_state:${userId}`, 'waiting_broadcast');
             // Примечание: В базовом REST Upstash SETEX может не работать через GET /set/key/val/ex/sec
             // Но мы можем использовать обычный SET, для админки этого хватит
-            
+
             await tg.call('sendMessage', {
                 chat_id: chatId,
                 text: '📝 Введите текст для рассылки (или /cancel для отмены):'
