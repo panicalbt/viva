@@ -306,7 +306,9 @@
         .player-info {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px; /* Reduced from 15px */
+            flex: 1;
+            min-width: 0; /* Important for ellipsis to work in flex */
         }
 
         .player-avatar {
@@ -440,29 +442,31 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
+            padding: 12px 15px; /* Reduced from 15px 20px */
             background: rgba(255, 255, 255, 0.03);
             border-radius: 20px;
             border: 1px solid transparent;
+            gap: 10px;
         }
 
         .rank {
             font-weight: 900;
-            font-size: 1.2rem;
-            width: 30px;
+            font-size: 1.1rem;
+            width: 25px; /* Reduced from 30px */
             opacity: 0.5;
+            text-align: center;
         }
 
         .player-name {
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 5px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 140px; /* Limit width for long nicknames */
+            flex: 1;
         }
 
         .donor-name {
@@ -480,6 +484,8 @@
         .player-score {
             font-weight: 900;
             color: var(--primary);
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .rank-1 {
@@ -559,7 +565,7 @@
         </div>
 
         <div class="boss-stage">
-            <img src="vova.png" id="vova" alt="VOVA">
+            <img src="1.png" id="vova" alt="VOVA">
         </div>
 
         <a href="https://t.me/sociapatik" id="creator-link">CREATOR: @sociapatik</a>
@@ -639,6 +645,19 @@
 
         scoreEl.innerText = count;
 
+        function updateBossImage() {
+            let newSrc = '1.png';
+            if (count >= 10000) {
+                newSrc = '3.png';
+            } else if (count >= 5000) {
+                newSrc = '2.png';
+            }
+            if (vova.src.indexOf(newSrc) === -1) {
+                vova.src = newSrc;
+            }
+        }
+        updateBossImage();
+
         let audioCtx;
 
         async function redisCommand(cmd, ...args) {
@@ -688,6 +707,7 @@
                         count = remoteScore;
                         scoreEl.innerText = count;
                         localStorage.setItem('vova_burgers', count);
+                        updateBossImage();
                         console.log('Scores synced from cloud:', count);
                     }
                 }
@@ -888,6 +908,7 @@
             count++;
             scoreEl.innerText = count;
             localStorage.setItem('vova_burgers', count);
+            updateBossImage();
             throttledSync();
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
             vova.parentElement.classList.remove('shake');
