@@ -57,6 +57,7 @@
         .header {
             text-align: center;
             z-index: 10;
+            margin-top: 20px; /* Space from top buttons */
         }
 
         #main-title {
@@ -238,16 +239,43 @@
         }
 
         #creator-link {
-            color: var(--primary);
+            color: #ffd700;
             text-decoration: none;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-            font-size: 0.65rem;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            font-weight: 900;
+            text-transform: uppercase;
+            animation: goldenGlow 2s infinite;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 20px;
         }
 
         #creator-link:hover {
-            opacity: 1;
+            transform: scale(1.1);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
         }
+
+        @keyframes goldenGlow {
+            0% {
+                transform: scale(1);
+                text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+                filter: brightness(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.9), 0 0 30px rgba(255, 215, 0, 0.4);
+                filter: brightness(1.3);
+            }
+
+            100% {
+                transform: scale(1);
+                text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+                filter: brightness(1);
+            }
+        }
+
 
         /* Top Buttons Layout */
         .top-btn {
@@ -527,17 +555,14 @@
                 <div style="font-size: 1rem; color: var(--primary); font-weight: 900; letter-spacing: 2px;">BURGERS
                 </div>
             </div>
-            <div class="instruction">TAP HEAD TO FART</div>
+            <div class="instruction">ЕБАНИ ЖИРНОГО ПО ЧЕРДАКУ</div>
         </div>
 
         <div class="boss-stage">
             <img src="vova.png" id="vova" alt="VOVA">
         </div>
 
-        <div class="footer-text">
-            Ебани жирного на чердаку<br>
-            <a href="https://t.me/sociapatik" id="creator-link">CREATOR: @sociapatik</a>
-        </div>
+        <a href="https://t.me/sociapatik" id="creator-link">CREATOR: @sociapatik</a>
     </div>
 
     <!-- Leaderboard Modal -->
@@ -616,46 +641,49 @@
 
         let audioCtx;
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        async function redisCommand(cmd, ...args) {
+            if (!UPSTASH_URL || UPSTASH_URL.includes('YOUR_UPSTASH')) return null;
+            try {
+                const response = await fetch(UPSTASH_URL, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify([cmd, ...args])
+                });
+                const data = await response.json();
+                return data.result;
+            } catch (err) {
+                console.error(`Redis error (${cmd}):`, err);
+                return null;
             }
         }
 
         async function syncWithUpstash() {
-            if (!UPSTASH_URL || UPSTASH_URL.includes('YOUR_UPSTASH')) return;
-            
             try {
                 const photo = user.photo_url || '';
                 const member = `${username}|${photo}`; 
                 
                 // 1. Обновляем глобальный лидерборд
-                await fetch(`${UPSTASH_URL}/zadd/leaderboard/${count}/${member}`, {
-                    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-                });
+                await redisCommand('ZADD', 'leaderboard', count, member);
 
-                // 2. Сохраняем личный счет по ID пользователя для синхронизации между устройствами
+                // 2. Сохраняем личный счет по ID пользователя для синхронизации
                 if (user.id && user.id !== 'local') {
-                    await fetch(`${UPSTASH_URL}/set/user_score:${user.id}/${count}`, {
-                        headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-                    });
+                    await redisCommand('SET', `user_score:${user.id}`, count);
                 }
             } catch (err) {
-                console.error('Upstash sync error:', err);
+                console.error('Sync error:', err);
             }
         }
 
         async function loadInitialScore() {
-            if (!UPSTASH_URL || UPSTASH_URL.includes('YOUR_UPSTASH') || !user.id || user.id === 'local') return;
+            if (!user.id || user.id === 'local') return;
 
             try {
-                const response = await fetch(`${UPSTASH_URL}/get/user_score:${user.id}`, {
-                    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-                });
-                const data = await response.json();
-                
-                if (data.result !== null) {
-                    const remoteScore = parseInt(data.result);
+                const result = await redisCommand('GET', `user_score:${user.id}`);
+                if (result !== null) {
+                    const remoteScore = parseInt(result);
                     if (remoteScore > count) {
                         count = remoteScore;
                         scoreEl.innerText = count;
@@ -664,7 +692,7 @@
                     }
                 }
             } catch (err) {
-                console.error('Failed to load initial score:', err);
+                console.error('Load score error:', err);
             }
         }
 
@@ -680,20 +708,11 @@
             }
 
             try {
-                const response = await fetch(`${UPSTASH_URL}/zrevrange/leaderboard/0/9/WITHSCORES`, {
-                    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-                });
-                const data = await response.json();
-                const result = data.result || [];
+                const result = await redisCommand('ZREVRANGE', 'leaderboard', 0, 9, 'WITHSCORES');
+                const donorsResult = await redisCommand('SMEMBERS', 'donors');
+                const donors = new Set(donorsResult || []);
 
                 leaderboardList.innerHTML = '';
-                
-                // Получаем список донатеров из Redis (Set 'donors')
-                const donorsResponse = await fetch(`${UPSTASH_URL}/smembers/donors`, {
-                    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-                });
-                const donorsData = await donorsResponse.json();
-                const donors = new Set(donorsData.result || []);
 
                 if (result.length === 0) {
                     leaderboardList.innerHTML = '<div style="text-align: center; opacity: 0.5;">No scores yet!</div>';
@@ -792,6 +811,12 @@
                     }
                 }
             });
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
         }
 
         function playComicalSounds() {
